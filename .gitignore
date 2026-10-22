@@ -1,0 +1,11 @@
+# 编译产物
+auth_server
+*.o
+*.d
+
+# 运行时产物
+*.log
+nohup.out
+
+# 私钥/密钥文件不入库
+*.pem

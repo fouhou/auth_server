@@ -1,0 +1,44 @@
+# auth_server WAF 规则表
+# 格式: 每行一条 <编号>|<pattern>；空行与 # 开头的行忽略
+# - pattern 在加载时自动小写化(匹配目标为归一化后的小写文本)
+# - 行内空格属于 pattern 的一部分
+# - 编号命名约定 R<类别><序号>: 1 SQLi / 2 XSS / 3 穿越 / 4 RCE / 9 其它
+# - 表序即优先级: 同一请求命中多条规则时上报表序最靠前者
+# - 本文件改动后重启服务生效(重新构建 AC 自动机)
+#
+# ── SQL 注入 ──
+R1001|union select
+R1002|union all select
+R1003|select * from
+R1004|or 1=1
+R1005|' or '
+R1006|admin'--
+R1007|1=1 --
+R1008|waitfor delay
+# ── XSS ──
+R2001|<script
+R2002|javascript:
+R2003|onerror=
+R2004|onload=
+R2005|<iframe
+R2006|document.cookie
+# ── 路径穿越 / 敏感文件 ──
+R3001|../
+R3002|..\
+R3003|/etc/passwd
+R3004|boot.ini
+# ── 命令执行 / WebShell ──
+R4001|cmd.exe
+R4002|eval(
+R4003|system(
+R4004|exec(
+R4005|base64_decode(
+R4006|sleep(
+R4007|benchmark(
+R4008|wget http
+R4009|curl http
+R4010|nc -e
+R4011|<?php
+R4012|php://input
+# ── 其它 ──
+R9001|${jndi:

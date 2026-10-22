@@ -1,0 +1,2 @@
+# 全仓统一 LF: 项目在 Linux 上编译运行, 防止 Windows autocrlf 把脚本转成 CRLF
+* text=auto eol=lf

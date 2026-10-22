@@ -1,0 +1,24 @@
+# hiredis 内部 sds 缓冲的已知良性 possibly-lost 抑制
+#
+# 背景: hiredis 的 sds 字符串采用"块头部前置"分配法，返回指针指向块中间，
+# valgrind 将其归入 possibly lost(实际被进程级单例 redisContext 全程持有)；
+# 且该缓冲随连接生命周期存活，属设计使然，非泄漏。
+# 判定标准见 valgrind_run.sh: definitely lost=0 且无 Invalid 即通过。
+#
+# 框架只列到 hiredis 侧(sdsnewlen/sdsMakeRoomFor)为止——valgrind 按栈顶
+# 顺序匹配，更深的调用帧(无论经哪条业务路径触发)一律命中，避免调用点
+# 变化导致抑制失效。本项目代码不直接调用 sds 接口，无误伤面。
+{
+   hiredis-sds-alloc-singleton
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:sdsnewlen
+}
+{
+   hiredis-sds-realloc-singleton
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:realloc
+   fun:sdsMakeRoomFor
+}
